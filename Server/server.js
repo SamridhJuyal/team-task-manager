@@ -11,10 +11,6 @@ app.get("/", (req, res) => {
   res.send("API is running 🚀");
 });
 
-app.get("/api/test", (req, res) => {
-  res.json({ message: "API working" });
-});
-
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/projects", require("./routes/projectRoutes"));
 app.use("/api/tasks", require("./routes/taskRoutes"));

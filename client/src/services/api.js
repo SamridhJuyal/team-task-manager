@@ -4,18 +4,13 @@ const API = axios.create({
   baseURL: "https://team-task-manager-production-a1f1.up.railway.app/api",
 });
 
-API.interceptors.request.use((req) => {
+API.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
-
-  console.log("TOKEN FOUND:", token);
-
+  config.headers["Content-Type"] = "application/json";
   if (token) {
-    req.headers.Authorization = `Bearer ${token}`;
+    config.headers.Authorization = `Bearer ${token}`;
   }
-
-  console.log("HEADERS SENT:", req.headers); // IMPORTANT
-
-  return req;
+  return config;
 });
 
 export default API;
