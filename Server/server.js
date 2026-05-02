@@ -6,7 +6,7 @@ const cors = require("cors");
 dotenv.config();
 const app = express();
 
-// CORS CONFIG (put this BEFORE routes)
+/* Allow your Vercel frontend + local dev */
 const allowedOrigins = [
   "https://team-task-manager-beryl-five.vercel.app",
   "http://localhost:5173",
@@ -15,11 +15,13 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: function (origin, callback) {
-      // allow requests with no origin (like mobile apps, curl)
+      // allow tools like Postman / curl (no origin)
       if (!origin) return callback(null, true);
+
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
+
       return callback(new Error("Not allowed by CORS"));
     },
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
@@ -29,13 +31,10 @@ app.use(
   }),
 );
 
-// Handle preflight for all routes
 app.options("*", cors());
 
-// Body parser
 app.use(express.json());
 
-// Health routes
 app.get("/", (req, res) => {
   res.send("API is running 🚀");
 });
@@ -44,22 +43,21 @@ app.get("/api/test", (req, res) => {
   res.json({ message: "API working" });
 });
 
-// Routes
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/projects", require("./routes/projectRoutes"));
 app.use("/api/tasks", require("./routes/taskRoutes"));
 app.use("/api/dashboard", require("./routes/dashboardRoutes"));
 
-// PORT (Railway)
 const PORT = process.env.PORT || 5000;
 
-// DB + server start
 mongoose
   .connect(process.env.MONGO_URI, {
     serverSelectionTimeoutMS: 5000,
   })
   .then(() => {
     console.log("MongoDB Connected");
+
+    // bind to 0.0.0.0 so Railway can expose it
     app.listen(PORT, "0.0.0.0", () => {
       console.log(`Server running on port ${PORT}`);
     });
@@ -68,10 +66,10 @@ mongoose
     console.error("MongoDB Error:", err);
   });
 
-// global error logging
 process.on("uncaughtException", (err) => {
   console.error("Uncaught Exception:", err);
 });
+
 process.on("unhandledRejection", (err) => {
   console.error("Unhandled Rejection:", err);
 });
