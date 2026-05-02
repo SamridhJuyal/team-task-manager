@@ -6,7 +6,34 @@ const cors = require("cors");
 dotenv.config();
 const app = express();
 
-app.use(cors({ origin: true, credentials: true }));
+const allowedOrigins = [
+  "https://team-task-manager-beryl-five.vercel.app",
+  "http://localhost:5173",
+];
+
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (!origin || allowedOrigins.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin || "*");
+  }
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization",
+  );
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, PATCH, DELETE, OPTIONS",
+  );
+
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+
+  next();
+});
+
+app.use(cors({ origin: allowedOrigins, credentials: true }));
 
 app.use(express.json());
 
